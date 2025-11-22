@@ -60,6 +60,7 @@ namex
 nest-asyncio
 networkx
 numpy
+openai
 opencv-contrib-python
 openpyxl
 opt-einsum

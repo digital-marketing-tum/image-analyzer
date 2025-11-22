@@ -440,6 +440,116 @@ def describe_llm(self, df_images, prompt="Describe the image."):
         print(f"Error in LLM setup: {str(e)}")
         return df
 
+def describe_llm_api(self, df_images, prompt="Describe the image."):
+    """
+    This function generates a textual description of an image using OpenAI's API (e.g., GPT-4 Vision).
+    The prompt to generate the description can be customized.
+    Requires an OpenAI API key to be set in the environment variable specified in the configuration.
+
+    :param self: IA object
+    :param df_images: DataFrame containing a 'filePath' column with paths to image files
+    :param prompt: The prompt to use for generating the description
+    :return: DataFrame with added feature columns:
+        - descrLLM_API: The generated description
+        - error_llm_api: Error message if generation failed
+    """
+
+    import base64
+    import os
+    from openai import OpenAI
+
+    # Create a copy of the input DataFrame to store results
+    df = df_images.copy()
+
+    try:
+        # Get parameters from config
+        config_params = self.config.get('describe_llm_api', {}).get('parameters', {})
+        model = config_params.get('model', 'gpt-4o')
+        api_key_env_var = config_params.get('api_key_env_var', 'OPENAI_API_KEY')
+        max_tokens = config_params.get('max_tokens', 1000)
+        
+        # Get API key from environment variable
+        api_key = os.getenv(api_key_env_var)
+        
+        if not api_key:
+            error_msg = f"OpenAI API key not found. Please set the environment variable '{api_key_env_var}'."
+            print(f"Error: {error_msg}")
+            df['error_llm_api'] = error_msg
+            return df
+
+        # Initialize OpenAI client and test connection
+        try:
+            client = OpenAI(api_key=api_key)
+            # Test connection with a simple API call
+            # We'll do a minimal test by checking if we can create a client
+            # The actual connection test happens on first API call
+        except Exception as e:
+            error_msg = f"Failed to initialize OpenAI client: {str(e)}"
+            print(f"Error: {error_msg}")
+            df['error_llm_api'] = error_msg
+            return df
+
+        # Initialize new columns
+        df['descrLLM_API'] = ""
+        df['error_llm_api'] = ""
+
+        # Iterate over all images using enumerate on the DataFrame column
+        for idx, image_path in enumerate(tqdm(df_images['filePath'])):
+            try:
+                # Check if file exists
+                if not os.path.exists(image_path):
+                    if self.verbose: print(f"Warning: File not found: {image_path}")
+                    df.loc[idx, 'error_llm_api'] = "File not found"
+                    continue
+
+                # Load and encode image
+                try:
+                    with open(image_path, 'rb') as image_file:
+                        image_data = image_file.read()
+                        base64_image = base64.b64encode(image_data).decode('utf-8')
+                except Exception as e:
+                    if self.verbose: print(f"Warning: Failed to load image: {image_path}")
+                    df.loc[idx, 'error_llm_api'] = f"Image load error: {str(e)}"
+                    continue
+
+                # Generate description using OpenAI API
+                try:
+                    response = client.responses.create(
+                        model=model,
+                        input=[
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"type": "input_text", "text": prompt},
+                                    {"type": "input_image", "image_url": f"data:image/jpeg;base64,{base64_image}"},
+                                ],
+                            }
+                        ],
+                        max_tokens=max_tokens
+                    )
+                    
+                    description = response.output_text
+                    df.loc[idx, 'descrLLM_API'] = description
+                    
+                except Exception as e:
+                    error = f"OpenAI API error: {str(e)}"
+                    print(f"Error generating description for {image_path}: {error}")
+                    df.loc[idx, 'error_llm_api'] = error
+                    continue
+
+            except Exception as e:
+                error = f"Error processing {image_path}: {str(e)}"
+                print(error)
+                df.loc[idx, 'error_llm_api'] = error
+                continue
+
+        return df
+    
+    except Exception as e:
+        print(f"Error in OpenAI API setup: {str(e)}")
+        df['error_llm_api'] = f"Setup error: {str(e)}"
+        return df
+
 def detect_faces(self, df_images):
     '''
     This function:
