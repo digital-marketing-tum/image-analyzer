@@ -22,8 +22,9 @@ features:
     active: false
     parameters:
       model: gpt-4o
-      api_key_env_var: OPENAI_API_KEY
+      api_key: your_api_key
       max_tokens: 1000
+      prompt: Describe the image.
   detect_faces:
     active: true
     parameters:

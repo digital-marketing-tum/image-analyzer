@@ -440,15 +440,14 @@ def describe_llm(self, df_images, prompt="Describe the image."):
         print(f"Error in LLM setup: {str(e)}")
         return df
 
-def describe_llm_api(self, df_images, prompt="Describe the image."):
+def describe_llm_api(self, df_images):
     """
     This function generates a textual description of an image using OpenAI's API (e.g., GPT-4 Vision).
     The prompt to generate the description can be customized.
-    Requires an OpenAI API key to be set in the environment variable specified in the configuration.
+    Requires an OpenAI API key to be set in the config file.
 
     :param self: IA object
     :param df_images: DataFrame containing a 'filePath' column with paths to image files
-    :param prompt: The prompt to use for generating the description
     :return: DataFrame with added feature columns:
         - descrLLM_API: The generated description
         - error_llm_api: Error message if generation failed
@@ -465,14 +464,13 @@ def describe_llm_api(self, df_images, prompt="Describe the image."):
         # Get parameters from config
         config_params = self.config.get('describe_llm_api', {}).get('parameters', {})
         model = config_params.get('model', 'gpt-4o')
-        api_key_env_var = config_params.get('api_key_env_var', 'OPENAI_API_KEY')
+        api_key = config_params.get('api_key', 'your_api_key')
         max_tokens = config_params.get('max_tokens', 1000)
+        prompt = config_params.get('prompt', 'Describe the image.')
         
-        # Get API key from environment variable
-        api_key = os.getenv(api_key_env_var)
         
-        if not api_key:
-            error_msg = f"OpenAI API key not found. Please set the environment variable '{api_key_env_var}'."
+        if api_key == 'your_api_key':
+            error_msg = f"OpenAI API key not found. Please set the key in the config file."
             print(f"Error: {error_msg}")
             df['error_llm_api'] = error_msg
             return df
