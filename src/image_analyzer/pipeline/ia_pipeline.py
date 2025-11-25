@@ -169,6 +169,7 @@ class IA:
                 get_ocr_text,
                 describe_blip,
                 describe_llm,
+                describe_llm_api,
                 predict_coco_labels_yolo11,
                 predict_imagenet_classes_yolo11
             ]

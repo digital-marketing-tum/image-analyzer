@@ -67,6 +67,7 @@ nest-asyncio==1.6.0
 networkx==3.2
 numpy==2.0.1
 opencv-contrib-python==4.11.0.86
+openai==2.8.1
 openpyxl==3.1.5
 opt-einsum==3.4.0
 optree==0.14.0

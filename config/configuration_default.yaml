@@ -18,6 +18,13 @@ features:
     parameters:
       max_new_tokens: 1000
       model: microsoft/Phi-4-multimodal-instruct
+  describe_llm_api:
+    active: false
+    parameters:
+      model: gpt-4o
+      api_key: your_api_key
+      max_tokens: 1000
+      prompt: Describe the image.
   detect_faces:
     active: true
     parameters:

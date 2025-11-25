@@ -128,6 +128,10 @@ Before you follow the steps below, ensure the virtual environment is still activ
 - Install to default `C:\Program Files\Tesseract-OCR\` directory
 - If you are using a different directory, you can adjust the variable `windows_path_to_tesseract` in the `config/configuration.yaml` file
 
+### OpenAI API
+If you want to use the `describe_llm_api` feature extraction you need to specify an OpenAI key in the `config/configuration.yaml` file.
+⚠️ Don't commit your `config/configuration.yaml` file containing your API key!
+
 ## Contributing
 
 Contributions of all experience levels are welcome! There are many ways to contribute, and we appreciate your help.<br>
